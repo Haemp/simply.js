@@ -1,0 +1,77 @@
+<!---
+
+    - control statements are cause -> effect statements
+-->
+<todo-app>
+    <script>
+        class TodoApp{
+            constructor(){
+                // this is a control statement written imperatively
+                this.nav.on('change', (viewName) => {
+                    this.views.setActive(viewName);
+            })
+            }
+        }
+    </script>
+
+    <!-- Control statements declarative -->
+    <control (nav.change)="views.setActive($value)"></control>
+    <control (model.new)="notification.set('success', $value)"></control>
+
+    <todo-model #model>
+        <script>
+            class TodoModel{
+                constructor(){
+                    super();
+                    this.todos = [];
+                }
+
+                add(todo){
+                    this.todos.push(todo);
+                    this.trigger('new');
+                }
+            }
+        </script>
+    </todo-model>
+    <views>
+        <view #listView>
+            <todo-list (model.new)="list.refresh(model.todos)" #list>
+                <template>
+                    <ul ref="list"></ul>
+                </template>
+                <script>
+                    class TodoList{
+                        refresh(items){
+                            this.list.innerHTML = '';
+                            items.forEach((item) => {
+                                const t = document.createElement('todo');
+                            t.init(item);
+                            this.list.appendChild(t);
+                        })
+                        }
+                    }
+                </script>
+            </todo-list>
+        </view>
+        <view #createView>
+            <create-todo (created)="model.add($value)">
+                <script>
+                    class CreateTodo{
+                        click(){
+                            this.trigger('created', {foo:'bar'})
+                        }
+                    }
+                </script>
+                <template>
+                    <button (click)="click($value)">New</button>
+                </template>
+            </create-todo>
+        </view>
+    </views>
+    <navigation>
+        <template>
+            <button (click)="trigger('change', 'list')">List</button>
+            <button (click)="trigger('change', 'create')">Create</button>
+        </template>
+    </navigation>
+</todo-app>
