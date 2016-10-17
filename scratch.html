@@ -34,8 +34,8 @@
         </script>
     </todo-model>
     <views>
-        <view #listView>
-            <todo-list (model.new)="list.refresh(model.todos)" #list>
+        <view #list-view>
+            <todo-list (model.new-thing)="list.refresh(model.todos)" #list>
                 <template>
                     <ul ref="list"></ul>
                 </template>
@@ -53,7 +53,7 @@
                 </script>
             </todo-list>
         </view>
-        <view #createView>
+        <view #create-view>
             <create-todo (created)="model.add($value)">
                 <script>
                     class CreateTodo{
