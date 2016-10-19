@@ -95,6 +95,19 @@ class Model{
 // TODO: implement clean up for repeater or a controlled repeater
 // TODO: View toggler
 class Base extends HTMLElement{
+    static get functions(){
+        return {
+            '$repeat': Base.repeat,
+            '$http': Base.http
+        };
+    }
+
+    static http(node, el, url){
+
+        fetch(url).then(() => {
+            el.trigger('result');
+        });
+    }
 
     static compileRef({node, element, attrName}){
         const cleanName = Base.snakeToCamel(attrName.replace(/^#/, ''));
@@ -127,9 +140,17 @@ class Base extends HTMLElement{
         //}
     }
 
+    /**
+     * <div> <--- node
+     *     <span (attrName)="attrValue"></span> <--- element
+     * </div>
+     * @param node
+     * @param element
+     * @param attrName
+     * @param attrValue
+     */
     static compileCauseEffect({node, element, attrName, attrValue}){
-        let context = node;
-        let expression = attrValue
+        let expression = attrValue;
         const cleanAttr = Base.snakeToCamel(attrName.replace(/[\(\)]/g, ''));
 
         if(!expression){
@@ -138,53 +159,58 @@ class Base extends HTMLElement{
 
         // check if there is a dot - that means we have to take
         // the target into account
-        // TODO check if the this[target] is a model or html element
-        // HTML elements uses events and models uses propety assignments
-
         if (cleanAttr.includes('.')) {
 
             let [target, property] = cleanAttr.split('.');
 
             // if we're using $self we refer to the container
             // element root as the base for the property lookup.
-            // this requires the context to be a Model
+            // this requires the node to be a Model
             // TODO Write try catch with better error
-
-            if(context[target] instanceof HTMLElement){
-                context[target].addEventListener(property, (event) => {
-                    const cleanExec = expression.replace(/#/g, 'this.');
-                    new Function(['$value', '$el'], cleanExec).call(context, event, element);
+            // HTML elements uses events and models uses propety assignments
+            if(node[target] instanceof HTMLElement){
+                node[target].addEventListener(property, (event) => {
+                    Base.evaluate(expression, node, event, element);
                 })
             }else{
 
-                if(!context[target]){
-                    console.info('Auto Declaring model for: ', target, ' on ', context)
-                    context[target] = Model.proxify({});
+                if(!node[target]){
+                    console.info('Auto Declaring model for: ', target, ' on ', node);
+                    node[target] = Model.proxify(property === 'length' ? [] : {});
                 }
 
-                if(!context[target].$isProxy){
-                    console.info('Auto Wrapping model for: ', target, ' on ', context)
-                    context[target] = Model.proxify(context[target]);
+                if(!node[target].$isProxy){
+                    console.info('Auto Wrapping model for: ', target, ' on ', node);
+                    node[target] = Model.proxify(node[target]);
                 }
 
-                context[target].on(property, (propertyValue) => {
-                    Base.evaluate(expression, context, propertyValue, element);
+                node[target].on(property, (propertyValue) => {
+                    Base.evaluate(expression, node, propertyValue, element);
                 });
 
-                Base.evaluate(expression, context, context[target][property], element);
+                // trigger to get the first state of the element
+                Base.evaluate(expression, node, node[target][property], element);
             }
 
-
         }else{
-            element.addEventListener(cleanAttr, (event) => {
-                Base.evaluate(expression, context, event, element);
-            })
+
+            if(cleanAttr === '$compiled'){
+                Base.evaluate(expression, node, event, element);
+            }else{
+                element.addEventListener(cleanAttr, (event) => {
+                    Base.evaluate(expression, node, event, element);
+                })
+            }
         }
 
         element.removeAttribute(attrName);
-        element.setAttribute('data-action', expression);
+        element.setAttribute('data-cause-effect', attrName + '="' + expression+ '"');
     }
 
+    /**
+     * @deprecated
+     * @param node
+     */
     static cleanListeners({node}){
         node.querySelectorAll('*').forEach((element) => {
 
@@ -196,7 +222,6 @@ class Base extends HTMLElement{
 
                 // check if action
                 if (attrName.match(/(^\(.+\))/)) {
-
                     return;
                 }
 
@@ -204,14 +229,143 @@ class Base extends HTMLElement{
         });
     }
 
+    static repeat(node, array, dataName){
+        // node === $el
+
+
+        if(!node.trigger){
+            node.trigger = (eventName, data) => {
+                const event = new Event(eventName);
+                event.data = data;
+                node.dispatchEvent(event);
+            };
+        }
+
+        // fetch current element
+        const elements = Array.prototype.slice.call(node.children).slice(1);
+
+        if(elements.length === array.length){
+            // check if reordered
+
+
+        }else if(elements.length > array.length){
+            // remove element mode
+
+            // what do we add?
+            // where do we add it - element order should follow
+            // array order. so array[i] === element[i]
+            let numElements = elements.length;
+            for(let i = 0; i < elements.length; i++){
+
+                // there is an element registered without
+                // a data item present
+                if(elements[i][dataName] !== array[i]){
+                    elements[i].remove();
+                    elements.splice(i, 1);
+                    i--;
+                }else{
+                    elements[i].$index = i;
+                }
+            }
+        }else{
+            // add element mode
+            const tmpl = node.querySelector('template');
+            for(let i = 0; i < array.length; i++){
+
+                // there is a data item registered
+                // without an element
+                if(!elements[i] || array[i] !== elements[i][dataName]){
+
+
+
+                    // wrapper for to behave as #/this for the
+                    // template
+                    let wrapper = document.createElement('div');
+                    let instance = document.importNode(tmpl.content, true);
+                    wrapper.appendChild(instance);
+
+                    // we prepopulate the element with the model
+                    // value so it is there when we compile
+                    if(!array[i].$isProxy) array[i] = Model.proxify(array[i]);
+                    wrapper[dataName] = array[i];
+
+                    // give the items access to the parent
+                    // element
+                    wrapper.$repeatEl = node;
+                    wrapper.$index = i;
+
+                    if(elements.length === 0){
+                        node.appendChild(wrapper);
+                    }else{
+                        node.children[i].insertAdjacentElement('afterend', wrapper);
+                    }
+
+                    Base.compile(wrapper);
+                }
+            }
+        }
+
+
+        // TODO: Perf improvement - can do this better
+
+        // clean up DOM
+        // (data) -(listeners)-> (element)
+        // no the data actually contains the behaviour to act on the
+        // element
+        // So the element reference is baked into the listener
+        // which if we remove the element from the DOM will be an empty
+        // listener.
+        // we need to know what listeners we clean up
+        // if the actual piece of data is removed it's no worry, it will
+        // just stop sending events on update
+        // 1) check diff
+        // 2) add / remove / update mode
+        // 3) if add we have a data item that is not represented by an element
+        //    we can store this information in the repeater. We can
+        // 4) If we have less elements in the new array
+        // element.querySelectorAll('*:not(template)').forEach((childEl) => {
+        //     //Base.cleanListeners({childEl})
+        //     childEl.remove();
+        // });
+        //
+        // // now we need to clean up the listeners set by those elements
+        // if(array){
+        //     array.forEach((arrayItem) => {
+        //
+        //         // wrapper for to behave as #/this for the
+        //         // template
+        //         let wrapper = document.createElement('div');
+        //         let instance = document.importNode(tmpl.content, true);
+        //         wrapper.appendChild(instance);
+        //
+        //         // we prepopulate the element with the model
+        //         // value so it is there when we compile
+        //         wrapper[arrayItemName] = arrayItem;
+        //
+        //         // give the items access to the parent
+        //         // element
+        //         wrapper.$repeat = element;
+        //
+        //         Base.compile(wrapper);
+        //         element.appendChild(wrapper);
+        //     });
+        // }
+
+
+    }
+
+    // TODO: Problem with re-rendering
+    // will apply the listeners again - we might be able to check
+    // if the given expression is already registered
     static compileRepeat({node, element, attrValue}){
         let expression = attrValue;
 
+        // repeater adds trigger to the current element
         element.trigger = (eventName, data) => {
             const event = new Event(eventName);
             event.data = data;
             element.dispatchEvent(event);
-        }
+        };
 
         let refresh = () => {
             const tmpl = element.querySelector('template');
@@ -223,10 +377,25 @@ class Base extends HTMLElement{
             // TODO: Perf improvement - can do this better
 
             // clean up DOM
+            // (data) -(listeners)-> (element)
+            // no the data actually contains the behaviour to act on the
+            // element
+            // So the element reference is baked into the listener
+            // which if we remove the element from the DOM will be an empty
+            // listener.
+            // we need to know what listeners we clean up
+            // if the actual piece of data is removed it's no worry, it will
+            // just stop sending events on update
+            // 1) check diff
+            // 2) add / remove / update mode
+            // 3) if add we have a data item that is not represented by an element
+            //    we can store this information in the repeater. We can
+            // 4) If we have less elements in the new array
             element.querySelectorAll('*:not(template)').forEach((childEl) => {
                 //Base.cleanListeners({childEl})
                 childEl.remove();
             });
+
             // now we need to clean up the listeners set by those elements
             if(array){
                 array.forEach((arrayItem) => {
@@ -235,7 +404,7 @@ class Base extends HTMLElement{
                     // template
                     let wrapper = document.createElement('div');
                     let instance = document.importNode(tmpl.content, true);
-                    wrapper.appendChild(instance)
+                    wrapper.appendChild(instance);
 
                     // we prepopulate the element with the model
                     // value so it is there when we compile
@@ -250,7 +419,7 @@ class Base extends HTMLElement{
                 });
             }
         };
-        refresh()
+        refresh();
 
 
         element.repeat = refresh;
@@ -262,11 +431,15 @@ class Base extends HTMLElement{
         return str.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
     }
 
+    static compileFunction({node, element, attrName}){
+        element[attrName] = Base.functions[attrName];
+    }
+
     static compile(node){
 
         const refElements = [];
         const causeEffectElements = [];
-        const repeatElements = [];
+        const functionElements = [];
 
         Array.prototype.slice.apply(node.querySelectorAll('*')).concat(node).forEach((element) => {
 
@@ -278,34 +451,32 @@ class Base extends HTMLElement{
 
                 // check if identifier
                 if(attrName.match(/^#/)){
-                    refElements.push({element, attrName})
-                    return;
+                    return refElements.push({element, attrName});
                 }
 
                 // check if action
                 if (attrName.match(/(^\(.+\))/)) {
-                    causeEffectElements.push({element, attrName, attrValue});
-                    return;
+                    return causeEffectElements.push({element, attrName, attrValue});
                 }
 
-                if(attrName.match(/^repeat/)){
-                    repeatElements.push({element, attrName, attrValue})
-                    return;
+                // check if function
+                if(attrName.match(/^\$/)){
+                    return functionElements.push({element, attrName, attrValue});
                 }
             });
         });
 
         refElements.forEach(({element, attrName}) => {
             Base.compileRef({node, element, attrName})
-        })
+        });
 
-        repeatElements.forEach(({element, attrValue}) => {
-            Base.compileRepeat({node, element, attrValue})
-        })
+        functionElements.forEach(({element, attrName, attrValue}) => {
+            Base.compileFunction({node, element, attrName, attrValue})
+        });
         
         causeEffectElements.forEach(({element, attrName, attrValue}) => {
             Base.compileCauseEffect({node, element, attrName, attrValue});
-        })
+        });
 
     }
     render(template){
@@ -314,11 +485,6 @@ class Base extends HTMLElement{
     }
 }
 
-class Repeater extends HTMLTemplateElement{
-    createdCallback(){
-
-    }
-}
 
 /**
  * - [ ] Master detail

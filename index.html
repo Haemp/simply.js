@@ -2,16 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-    <script src="Base.js"></script>
+    <title (model.title)>Title</title>
 </head>
-<body>
-    <!-- <ah-test></ah-test> -->
-    <div (click)="#someModel.name = 'klk'">
-        <div (some-model.name)></div>
+<body $show #body $class $trigger>
 
-        <input type="text" ()/>
-        <button (list)=""></button>
+    <template (added)="$el.$script($el.innerHTML)" $script>
+        // first script of compiled node should be added to it
+        this.doThis = () => {
+
+        };
+    </template>
+
+    <div (model.length)="$el.innerHTML = $value"></div>
+
+    <div $repeat (model.length)="$el.$repeat(this.model, 'todo')" $trigger (remove)="this.model.splice($index, 1)">
+        <template>
+            <div $show (todo.editable)="$el.$show($value)">
+                <input (todo.isChecked)="$el.checked = $value">
+                <span (todo.name)></span>
+            </div>
+            <div $show (todo.editable)="$el.$show($value)">
+                <span (todo.name)></span>
+                <button (click)="$repeatEl.trigger('remove', $index)">X</button>
+            </div>
+        </template>
     </div>
+
+    <div>
+        <input #input-el type="text" (change)="this.model.show = $el.checked; console.log('asa')">
+        <button (click)="this.model.push({name: this.inputEl.value}); console.log('Added todo')">Add</button>
+    </div>
+
+    <div (model.show)="this.body.$show($el, $value)">Visible</div>
+    <script src="simply.js"></script>
+    <script>
+        Simply.compile(document.body);
+    </script>
 </body>
 </html>
