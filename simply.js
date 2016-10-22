@@ -1,14 +1,17 @@
-//define(function () {
-    class Simply{
+(function (window, define) {
 
-        static get functions(){
+    class Simply {
+
+        static get functions() {
             return {
                 '$repeat': Simply.repeat,
                 '$show': Simply.show
             };
         }
 
-        static proxify(obj){
+        static proxify(obj) {
+            obj = obj || {};
+
             return new Proxy(Object.assign(obj, {
                 observers: {},
                 off(prop, targetFunc){
@@ -18,7 +21,7 @@
                 },
 
                 on(prop, listenerFunction){
-                    if(!this.observers[prop]){
+                    if (!this.observers[prop]) {
                         this.observers[prop] = [];
                     }
 
@@ -26,7 +29,7 @@
                 },
 
                 trigger(prop, value){
-                    if(this.observers[prop]){
+                    if (this.observers[prop]) {
                         this.observers[prop].forEach((listenerFunction) => {
                             console.log('triggering change');
                             listenerFunction(value);
@@ -43,29 +46,29 @@
             })
         }
 
-        static show(el, show){
-            if(!show){
+        static show(el, show) {
+            if (!show) {
                 el.style.display = 'none';
-            }else{
+            } else {
                 el.style.display = 'block';
             }
         }
 
-        static compileRef({node, element, attrName}){
+        static compileRef({node, element, attrName}) {
             const cleanName = Simply.snakeToCamel(attrName.replace(/^#/, ''));
             node[cleanName] = element;
             element.removeAttribute(attrName);
             element.setAttribute('element-id', cleanName);
         }
 
-        static evaluate(expression, context, propertyValue, element){
+        static evaluate(expression, context, propertyValue, element) {
 
             expression = expression.trim();
             var semi = expression.lastIndexOf(';');
-            if(semi === -1){
+            if (semi === -1) {
                 expression = 'return ' + expression;
-            }else{
-                expression = expression.slice(0, semi) + '; return (' + expression.substr(semi+1) + ')';
+            } else {
+                expression = expression.slice(0, semi) + '; return (' + expression.substr(semi + 1) + ')';
             }
 
             let cleanExec = expression.replace(/#/g, 'this.');
@@ -73,20 +76,11 @@
             return f.apply(context, [propertyValue, element]);
         }
 
-        /**
-         * <div> <--- node
-         *     <span (attrName)="attrValue"></span> <--- element
-         * </div>
-         * @param node
-         * @param element
-         * @param attrName
-         * @param attrValue
-         */
-        static compileCauseEffect({node, element, attrName, attrValue}){
+        static compileCauseEffect({node, element, attrName, attrValue}) {
             let expression = attrValue;
             const cleanAttr = Simply.snakeToCamel(attrName.replace(/[\(\)]/g, ''));
 
-            if(!expression){
+            if (!expression) {
                 expression = "$el.innerText = $value || ''";
             }
 
@@ -99,20 +93,19 @@
                 // if we're using $self we refer to the container
                 // element root as the base for the property lookup.
                 // this requires the node to be a Model
-                // TODO Write try catch with better error
                 // HTML elements uses events and models uses propety assignments
-                if(node[target] instanceof HTMLElement){
+                if (node[target] instanceof HTMLElement) {
                     node[target].addEventListener(property, (event) => {
                         Simply.evaluate(expression, node, event, element);
                     })
-                }else{
+                } else {
 
-                    if(!node[target]){
+                    if (!node[target]) {
                         console.info('Auto Declaring model for: ', target, ' on ', node);
                         node[target] = Simply.proxify(property === 'length' ? [] : {});
                     }
 
-                    if(!node[target].$isProxy){
+                    if (!node[target].$isProxy) {
                         console.info('Auto Wrapping model for: ', target, ' on ', node);
                         node[target] = Simply.proxify(node[target]);
                     }
@@ -122,14 +115,16 @@
                     });
 
                     // trigger to get the first state of the element
-                    Simply.evaluate(expression, node, node[target][property], element);
+                    if (node[target][property]) {
+                        Simply.evaluate(expression, node, node[target][property], element);
+                    }
                 }
 
-            }else{
+            } else {
 
-                if(cleanAttr === '$compiled'){
+                if (cleanAttr === '$compiled') {
                     Simply.evaluate(expression, node, event, element);
-                }else{
+                } else {
                     element.addEventListener(cleanAttr, (event) => {
                         Simply.evaluate(expression, node, event, element);
                     })
@@ -137,13 +132,13 @@
             }
 
             element.removeAttribute(attrName);
-            element.setAttribute('data-cause-effect', attrName + '="' + expression+ '"');
+            element.setAttribute('data-cause-effect', attrName + '="' + expression + '"');
         }
 
-        static repeat(node, array, dataName){
+        static repeat(node, array, dataName) {
             // node === $el
 
-            if(!node.trigger){
+            if (!node.trigger) {
                 node.trigger = (eventName, data) => {
                     const event = new Event(eventName);
                     event.data = data;
@@ -154,37 +149,37 @@
             // fetch current element
             const elements = Array.prototype.slice.call(node.children).slice(1);
 
-            if(elements.length === array.length){
+            if (elements.length === array.length) {
                 // check if reordered
 
 
-            }else if(elements.length > array.length){
+            } else if (elements.length > array.length) {
                 // remove element mode
 
                 // what do we add?
                 // where do we add it - element order should follow
                 // array order. so array[i] === element[i]
                 let numElements = elements.length;
-                for(let i = 0; i < elements.length; i++){
+                for (let i = 0; i < elements.length; i++) {
 
                     // there is an element registered without
                     // a data item present
-                    if(elements[i][dataName] !== array[i]){
+                    if (elements[i][dataName] !== array[i]) {
                         elements[i].remove();
                         elements.splice(i, 1);
                         i--;
-                    }else{
+                    } else {
                         elements[i].$index = i;
                     }
                 }
-            }else{
+            } else {
                 // add element mode
                 const tmpl = node.querySelector('template');
-                for(let i = 0; i < array.length; i++){
+                for (let i = 0; i < array.length; i++) {
 
                     // there is a data item registered
                     // without an element
-                    if(!elements[i] || array[i] !== elements[i][dataName]){
+                    if (!elements[i] || array[i] !== elements[i][dataName]) {
 
                         // wrapper for to behave as #/this for the
                         // template
@@ -194,7 +189,7 @@
 
                         // we prepopulate the element with the model
                         // value so it is there when we compile
-                        if(!array[i].$isProxy) array[i] = Simply.proxify(array[i]);
+                        if (!array[i].$isProxy) array[i] = Simply.proxify(array[i]);
                         wrapper[dataName] = array[i];
 
                         // give the items access to the parent
@@ -202,9 +197,9 @@
                         wrapper.$repeatEl = node;
                         wrapper.$index = i;
 
-                        if(elements.length === 0){
+                        if (elements.length === 0) {
                             node.appendChild(wrapper);
-                        }else{
+                        } else {
                             node.children[i].insertAdjacentElement('afterend', wrapper);
                         }
 
@@ -214,62 +209,71 @@
             }
         }
 
-        static snakeToCamel(str){
-                return str.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
-            }
+        static snakeToCamel(str) {
+            return str.replace(/-([a-z])/g, function (g) {
+                return g[1].toUpperCase();
+            });
+        }
 
-        static compileFunction({node, element, attrName}){
-            element[attrName] = function(){
+        static compileFunction({node, element, attrName}) {
+            element[attrName] = function () {
                 Simply.functions[attrName].apply(this, [element, ...arguments]);
             }
         }
 
-        static compile(node){
+        static compile(node) {
 
-                const refElements = [];
-                const causeEffectElements = [];
-                const functionElements = [];
+            const refElements = [];
+            const causeEffectElements = [];
+            const functionElements = [];
 
-                Array.prototype.slice.apply(node.querySelectorAll('*')).concat(node).forEach((element) => {
+            Array.prototype.slice.apply(node.querySelectorAll('*')).forEach((element) => {
 
-                    // check if we have an attribute that is a watch
-                    if(element.attributes){
-                        Array.prototype.slice.apply(element.attributes).forEach((attr) => {
-                            const attrName = attr.name;
-                            const attrValue = attr.value;
+                // check if we have an attribute that is a watch
+                if (element.attributes) {
+                    Array.prototype.slice.apply(element.attributes).forEach((attr) => {
+                        const attrName = attr.name;
+                        const attrValue = attr.value;
 
-                            // check if identifier
-                            if(attrName.match(/^#/)){
-                                return refElements.push({element, attrName});
-                            }
+                        // check if identifier
+                        if (attrName.match(/^#/)) {
+                            return refElements.push({element, attrName});
+                        }
 
-                            // check if action
-                            if (attrName.match(/(^\(.+\))/)) {
-                                return causeEffectElements.push({element, attrName, attrValue});
-                            }
+                        // check if action
+                        if (attrName.match(/(^\(.+\))/)) {
+                            return causeEffectElements.push({element, attrName, attrValue});
+                        }
 
-                            // check if function
-                            if(attrName.match(/^\$/)){
-                                return functionElements.push({element, attrName, attrValue});
-                            }
-                        });
-                    }
-                });
+                        // check if function
+                        if (attrName.match(/^\$/)) {
+                            return functionElements.push({element, attrName, attrValue});
+                        }
+                    });
+                }
+            });
 
-                refElements.forEach(({element, attrName}) => {
-                    Simply.compileRef({node, element, attrName})
-                });
+            refElements.forEach(({element, attrName}) => {
+                Simply.compileRef({node, element, attrName})
+            });
 
-                functionElements.forEach(({element, attrName, attrValue}) => {
-                    Simply.compileFunction({node, element, attrName, attrValue})
-                });
+            functionElements.forEach(({element, attrName, attrValue}) => {
+                Simply.compileFunction({node, element, attrName, attrValue})
+            });
 
-                causeEffectElements.forEach(({element, attrName, attrValue}) => {
-                    Simply.compileCauseEffect({node, element, attrName, attrValue});
-                });
+            causeEffectElements.forEach(({element, attrName, attrValue}) => {
+                Simply.compileCauseEffect({node, element, attrName, attrValue});
+            });
 
-            }
+        }
     }
 
-//    return Simply;
-//})
+    if (!define) {
+        window.Simply = Simply;
+    } else {
+        define(function () {
+            return Simply;
+        })
+    }
+
+})(this, define);
