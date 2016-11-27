@@ -16,7 +16,7 @@
                             bottom: 0px;
                         }
                     </style>
-                    <input type="text" value="/ProgressBar.js" #el-url (keypress)="$value.key === 'Enter' ? this.fetchUrl(this.elUrl.value) : null">
+                    <input type="text" value="/ProgressBar.js" #el-url (keypress == 'Enter')="$value.key === 'Enter' ? this.fetchUrl(this.elUrl.value) : null">
                     <iframe #container></iframe>
 
                     <div class="actions">

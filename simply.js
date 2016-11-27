@@ -88,6 +88,8 @@
             // the target into account
             if (cleanAttr.includes('.')) {
 
+
+
                 let [target, property] = cleanAttr.split('.');
 
                 // if we're using $self we refer to the container

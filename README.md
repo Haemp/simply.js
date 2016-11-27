@@ -97,11 +97,16 @@ of a model will cause an event
         <div (list-item.name)></div>
     </template>
 </div>
-
 ```
 
 
 ### Show/Hide
+```html
+<div (list.length >= 0)="$el.$show($value)" $show>
+</div>
+```
+
+
 ### Adding custom components
 
 ## Gotchas
