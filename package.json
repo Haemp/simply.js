@@ -1,0 +1,19 @@
+{
+  "name": "simply.js",
+  "version": "1.0.0",
+  "description": "Simply Javascript",
+  "main": "simply.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Haemp/simply.js.git"
+  },
+  "author": "Hampus Ahlgren",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Haemp/simply.js/issues"
+  },
+  "homepage": "https://github.com/Haemp/simply.js#readme"
+}
