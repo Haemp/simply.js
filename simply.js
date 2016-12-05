@@ -270,7 +270,7 @@
                 element.trigger = (eventName, data) => {
                     const event = new Event(eventName);
                     event.data = data;
-                    node.dispatchEvent(event);
+                    element.dispatchEvent(event);
                 };
 
                 element.trigger('compile');
