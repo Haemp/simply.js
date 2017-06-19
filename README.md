@@ -36,50 +36,66 @@ Simple view Example
 </html>
 ```
 
-Web Components example
+Simply Component example
 ```javascript
-    
-    class CustomElement extends HTMLElement{
-        
-        static get template(){
-            return `
-                <div>
-                    <ul>
-                        <li (click)="this.select(item)" each="item in this.items">
-                            {{ item.name }}
-                        </li>
-                    </ul>
-                    <div if="this.selectedItem">
-                        {{ this.selectedItem.name }} is my favorite
-                    </div>
-                </div>
-            `;
-        }
+class SimplyComponent extends Simply.Component{
 
-        constructor(){
-            super();
-            this.shadow = this.attachShadow({mode: 'open'});
-            this.items = [
-                {name: 'Jessica'},
-                {name: 'Carla'},
-                {name: 'Christy'}
-            ];
-        }    
-    
-        select(item){
-            this.selectedItem = item;
-            this.render();
-        }
-        
-        connectedCallback(){
-            this.render();    
-        }
-        
-        render(){
-            CustomElement.render(this, this.shadow)
-        }
+    static get template(){
+        return 'hej';
     }
-    CustomElement.render = Simply.compileTemplate(CustomElement.template);
+
+    connectedCallback(){
+        
+        // call this manually when the view needs to update
+        this.render();
+    }
+}
+customElements.define('s-simplycomponent', SimplyComponent);
+SimplyComponent.compile();
+```
+
+Pure Web Components example
+```javascript
+class CustomElement extends HTMLElement{
     
+    static get template(){
+        return `
+            <div>
+                <ul>
+                    <li (click)="this.select(item)" each="item in this.items">
+                        {{ item.name }}
+                    </li>
+                </ul>
+                <div if="this.selectedItem">
+                    {{ this.selectedItem.name }} is my favorite
+                </div>
+            </div>
+        `;
+    }
+
+    constructor(){
+        super();
+        this.shadow = this.attachShadow({mode: 'open'});
+        this.items = [
+            {name: 'Jessica'},
+            {name: 'Carla'},
+            {name: 'Christy'}
+        ];
+    }    
+
+    select(item){
+        this.selectedItem = item;
+        this.render();
+    }
+    
+    connectedCallback(){
+        this.render();    
+    }
+    
+    render(){
+        CustomElement.render(this, this.shadow)
+    }
+}
+CustomElement.render = Simply.compileTemplate(CustomElement.template);
 ```
 

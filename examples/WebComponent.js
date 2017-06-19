@@ -40,3 +40,18 @@ class WebComponent extends HTMLElement{
 }
 WebComponent.render = Simply.compileTemplate(WebComponent.template);
 customElements.define('s-webcomponent', WebComponent);
+
+console.log(Simply.Component);
+
+class SimplyComponent extends Simply.Component{
+
+    static get template(){
+        return 'hej';
+    }
+
+    connectedCallback(){
+        this.render();
+    }
+}
+customElements.define('s-simplycomponent', SimplyComponent);
+SimplyComponent.compile();

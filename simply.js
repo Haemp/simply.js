@@ -392,8 +392,26 @@ function snakeToCamel(str){
     return str.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
 }
 
+class Component extends HTMLElement{
+
+    static compile(){
+        this.render = SimplyRender(this.template);
+    }
+
+    constructor(){
+        super();
+        this.shadow = this.attachShadow({mode: 'open'});
+        this.render = _ => SimplyComponent.render(this, this.shadow);
+    }
+
+    static get template(){
+        throw Error('Template methods needs to be overriden by compoent');
+    }
+}
+
 module.exports = {
     compileTemplate: SimplyRender,
-    iDOM
+    iDOM,
+    Component: Component
 };
 
