@@ -401,7 +401,7 @@ class Component extends HTMLElement{
     constructor(){
         super();
         this.shadow = this.attachShadow({mode: 'open'});
-        this.render = _ => SimplyComponent.render(this, this.shadow);
+        this.render = _ => Component.render(this, this.shadow);
     }
 
     static get template(){
