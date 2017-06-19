@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simply Demo</title>
+    <script src="./simply.min.js"></script>
+</head>
+<body>
+    <div id="main"></div>
+    <script>
+            const render = Simply.compileTemplate('<div>{{this.hej}}</div>');
+            const main = document.querySelector('#main');
+            main.hej = 'Hej din fuling';
+            render(main);
+    </script>
+</body>
+</html>
