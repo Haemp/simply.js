@@ -1,19 +1,30 @@
 {
   "name": "simply.js",
   "version": "1.0.0",
-  "description": "Simply Javascript",
+  "description": "Writing javascript should be simple.",
   "main": "simply.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "rollup -w --input simply.js --output simply.min.js --format iife -m inline --name simply",
+    "build": "browserify simply.js --s simply > simply.min.js",
+    "run": "iron ."
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Haemp/simply.js.git"
   },
-  "author": "Hampus Ahlgren",
+  "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Haemp/simply.js/issues"
   },
-  "homepage": "https://github.com/Haemp/simply.js#readme"
+  "homepage": "https://github.com/Haemp/simply.js#readme",
+  "dependencies": {
+    "incremental-dom": "^0.5.1"
+  },
+  "devDependencies": {
+    "browserify": "^14.4.0",
+    "rollup": "^0.43.0",
+    "rollup-watch": "^4.0.0"
+  }
 }
