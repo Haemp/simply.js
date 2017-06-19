@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "rollup -w --input simply.js --output simply.min.js --format iife -m inline --name simply",
-    "build": "browserify simply.js --s simply > simply.min.js",
+    "build": "browserify simply.js --s Simply > simply.min.js",
     "run": "iron ."
   },
   "repository": {

@@ -147,7 +147,7 @@ function generateTemplateRecusive(curNode){
 
 function closeElement(tagName){
     return `
-    simply.iDOM.elementClose('${tagName}');
+    Simply.iDOM.elementClose('${tagName}');
 `
 }
 
@@ -165,7 +165,7 @@ function closeIfStatement() {
 
 function closeOpenTag() {
     return `
-    curNode = simply.iDOM.elementOpenEnd();
+    curNode = Simply.iDOM.elementOpenEnd();
 `;
 }
 
@@ -287,11 +287,11 @@ function applyAttributes(attrs, attrProps){
         if(shouldInterpolate(attrValue)){
             attrValue = cleanInterpolationTags(attrValue);
             tmpl = `
-            simply.iDOM.attr('${cleanAttrName(attr.name)}', ${attrValue});
+            Simply.iDOM.attr('${cleanAttrName(attr.name)}', ${attrValue});
         `;
         }else{
             tmpl = `
-            simply.iDOM.attr('${cleanAttrName(attr.name)}', '${escapeSingleQuotes(attrValue)}');
+            Simply.iDOM.attr('${cleanAttrName(attr.name)}', '${escapeSingleQuotes(attrValue)}');
         `;
         }
 
@@ -302,7 +302,7 @@ function applyAttributes(attrs, attrProps){
     // if we have a show attribute property
     if(attrProps.show){
         tmpl += `
-            simply.iDOM.attr('style', !!${attrProps.show} ? '' : 'display: none;');
+            Simply.iDOM.attr('style', !!${attrProps.show} ? '' : 'display: none;');
         `;
     }
 
@@ -311,7 +311,7 @@ function applyAttributes(attrs, attrProps){
 
 function openTag(tagName){
     return `
-        simply.iDOM.elementOpenStart('${tagName}');
+        Simply.iDOM.elementOpenStart('${tagName}');
     `
 }
 
@@ -329,14 +329,14 @@ function addText(textValue){
         // so we should capture those
         tmpl += `
             try{
-                simply.iDOM.text(\`${text}\` || '');
+                Simply.iDOM.text(\`${text}\` || '');
             }catch(e){
                 console.error(e);
             }
         `;
     }else{
         tmpl += `
-            simply.iDOM.text(\`${escapeBacktickQuotes(text)}\`);
+            Simply.iDOM.text(\`${escapeBacktickQuotes(text)}\`);
         `;
     }
 
