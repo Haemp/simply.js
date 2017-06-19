@@ -60,9 +60,9 @@ Web Components example
             super();
             this.shadow = this.attachShadow({mode: 'open'});
             this.items = [
-                {itemName: 'Jessica'},
-                {itemName: 'Carla'},
-                {itemName: 'Christy'}
+                {name: 'Jessica'},
+                {name: 'Carla'},
+                {name: 'Christy'}
             ];
         }    
     
