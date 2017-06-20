@@ -4,9 +4,7 @@ class WebComponent extends HTMLElement{
         return `
             <div>
                 <ul>
-                    <li (click)="this.select(item)" each="item in this.items">
-                        {{ item.name }}
-                    </li>
+                    <s-simplycomponent (click)="this.select(item)" id="{item.name}" each="item in this.items"></s-simplycomponent>
                 </ul>
                 <div if="this.selectedItem">
                     {{ this.selectedItem.name }} is my favorite

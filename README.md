@@ -62,7 +62,7 @@ class CustomElement extends HTMLElement{
         return `
             <div>
                 <ul>
-                    <li (click)="this.select(item)" each="item in this.items">
+                    <li (click)="this.select(item)" id="{item.id}" each="item in this.items">
                         {{ item.name }}
                     </li>
                 </ul>

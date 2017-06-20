@@ -51,13 +51,12 @@ function SimplyRender(template){
         // so we use setTimeout to queue up the function for the
         // next frame.
 
-        setTimeout(() => {
-            iDOM.patch(renderNode, () => {
-                new Function('node', `
-                    ${iTemplate}
-                `).call(thisNode, thisNode);
-            });
+        iDOM.patch(renderNode, () => {
+            new Function('node', `
+                ${iTemplate}
+            `).call(thisNode, thisNode);
         });
+
     }
 
     // Notes on performance: if this walk becomes a nusance when
@@ -114,7 +113,7 @@ function generateTemplateRecusive(curNode){
             // if there is an if attrProp we wrap this
             // in an if statement
             // TODO: Void elements
-            iTemplate += openTag(tagName);
+            iTemplate += openTag(tagName, attrProps);
 
             // 4 Apply the attributes
             iTemplate += applyAttributes(curNode.attributes, attrProps);
@@ -309,9 +308,9 @@ function applyAttributes(attrs, attrProps){
     return tmpl;
 }
 
-function openTag(tagName){
+function openTag(tagName, attrProps){
     return `
-        Simply.iDOM.elementOpenStart('${tagName}');
+        Simply.iDOM.elementOpenStart('${tagName}', ${attrProps.id});
     `
 }
 
