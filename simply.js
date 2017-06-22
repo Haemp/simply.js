@@ -103,9 +103,6 @@ function generateTemplateRecusive(curNode){
         // properties.
         if(attrProps.each){
             iTemplate += applyEach(attrProps.each, curNode);
-
-            // if there isnt an each clause we
-            // carry on parsing like usual
         }else{
             if(attrProps.if) iTemplate += openIfStatement(attrProps.if);
 
@@ -133,6 +130,8 @@ function generateTemplateRecusive(curNode){
             // 6 Close the tag
             iTemplate += closeElement(tagName);
 
+            iTemplate += triggerCompiled();
+
             if(attrProps.if) iTemplate += closeIfStatement();
         }
     }
@@ -142,6 +141,22 @@ function generateTemplateRecusive(curNode){
     `;
     return iTemplate;
 
+}
+
+/**
+ * When we're finished compiling an element we trigger a compiled
+ * event to let the element initiate itself.
+ *
+ * Why not rely on the connectedCallback for this? Because the that
+ * callback triggers on first connection with the DOM which is before
+ * having had its attributes and attrProps assigned.
+ */
+function triggerCompiled(){
+    return `
+        if(typeof curNode.compiledCallback === 'function'){
+            curNode.compiledCallback();
+        }
+    `;
 }
 
 function closeElement(tagName){
