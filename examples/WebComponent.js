@@ -48,8 +48,14 @@ class SimplyComponent extends Simply.Component{
     }
 
     connectedCallback(){
+        console.log('Here we don\'t have any incremental-dom attributes yet', this.attributes.length);
+    }
+
+    compiledCallback(){
+        console.log('Here they are', this.attributes.length);
         this.render();
     }
+
 }
 customElements.define('s-simplycomponent', SimplyComponent);
 SimplyComponent.compile();
