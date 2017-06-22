@@ -6,6 +6,7 @@ class WebComponent extends HTMLElement{
                 <ul>
                     <s-simplycomponent (click)="this.select(item)" id="{item.name}" each="item in this.items"></s-simplycomponent>
                 </ul>
+                <s-anothercomponent></s-anothercomponent>
                 <div if="this.selectedItem">
                     {{ this.selectedItem.name }} is my favorite
                 </div>
@@ -55,7 +56,16 @@ class SimplyComponent extends Simply.Component{
         console.log('Here they are', this.attributes.length);
         this.render();
     }
-
 }
 customElements.define('s-simplycomponent', SimplyComponent);
 SimplyComponent.compile();
+
+
+class AnotherComponent extends HTMLElement{
+
+    compiledCallback(){
+        this.innerHTML = 'This is my first innerHTML';
+    }
+}
+
+customElements.define('s-anothercomponent', AnotherComponent);

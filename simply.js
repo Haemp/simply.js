@@ -153,8 +153,9 @@ function generateTemplateRecusive(curNode){
  */
 function triggerCompiled(){
     return `
-        if(typeof curNode.compiledCallback === 'function'){
+        if(typeof curNode.compiledCallback === 'function' && curNode.$compiled != true){
             curNode.compiledCallback();
+            curNode.$compiled = true;
         }
     `;
 }
