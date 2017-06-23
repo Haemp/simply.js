@@ -325,7 +325,7 @@ function applyAttributes(attrs, attrProps){
 }
 
 function openTag(tagName, attrProps){
-    return `debugger;
+    return `
         Simply.iDOM.elementOpenStart('${tagName}', ${attrProps.id});
     `
 }
