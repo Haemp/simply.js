@@ -325,7 +325,7 @@ function applyAttributes(attrs, attrProps){
 }
 
 function openTag(tagName, attrProps){
-    return `
+    return `debugger;
         Simply.iDOM.elementOpenStart('${tagName}', ${attrProps.id});
     `
 }
@@ -411,14 +411,19 @@ class Component extends HTMLElement{
 
     static compile(){
         const render = SimplyRender(this.template);
+        this.prototype.$shadyDom = this.shadyDom
         this.prototype.render = function () {
-            return render(this, this.shadow);
+
+            // shadyDom means we render directly to the components innerHTML
+            // this circumvents iDOM compilation of children
+            return render(this, this.$shadyDom ? this : this.shadow);
         }
     }
 
     constructor(){
         super();
-        this.shadow = this.attachShadow({mode: 'open'});
+        if(!this.$shadyDom)
+            this.shadow = this.attachShadow({mode: 'open'});
     }
 
     static get template(){
