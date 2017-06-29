@@ -3,7 +3,7 @@ class WebComponent extends HTMLElement{
     static get template(){
         return `
             <div>
-                <ul>
+                <ul if="this.timesRendered === 3">
                     <s-simplycomponent (click)="this.select(item)" id="{item.name}" each="item in this.items"></s-simplycomponent>
                 </ul>
                 <s-anothercomponent></s-anothercomponent>
@@ -18,6 +18,7 @@ class WebComponent extends HTMLElement{
 
     constructor(){
         super();
+
         this.timesRendered = 0;
         this.shadow = this.attachShadow({mode: 'open'});
         this.items = [
@@ -101,7 +102,7 @@ class AnotherSimplyComponent extends Simply.Component{
         return `
             <div>
                 Another Simply component {{ this.taliho }}
-                <input type="text" (keyup)="this.onChange($event)">
+                <input type="text" (keydown)="this.onChange($event)">
             </div>
         `;
     }

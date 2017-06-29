@@ -1,3 +1,9 @@
+# TODO
+[ ] - Add a way to include simply via ES6 module loader
+There is an issue with this way of loading simply right now. The iDOM relies on globally set values. 
+We need to pass the idom global vars into the outtermost scope of the build code. so that we don't rely on global 
+values like that. 
+
 # simply.js
 There are two hard things in working with native javascript in a modern way. 
 

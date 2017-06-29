@@ -52,9 +52,9 @@ function SimplyRender(template){
         // next frame.
 
         iDOM.patch(renderNode, () => {
-            new Function('node', `
+            new Function('node', 'iDOM', `
                 ${iTemplate}
-            `).call(thisNode, thisNode);
+            `).call(thisNode, thisNode, iDOM);
         });
 
     }
@@ -162,7 +162,7 @@ function triggerCompiled(){
 
 function closeElement(tagName){
     return `
-    Simply.iDOM.elementClose('${tagName}');
+    iDOM.elementClose('${tagName}');
 `
 }
 
@@ -180,7 +180,7 @@ function closeIfStatement() {
 
 function closeOpenTag() {
     return `
-    curNode = Simply.iDOM.elementOpenEnd();
+    curNode = iDOM.elementOpenEnd();
 `;
 }
 
@@ -302,11 +302,11 @@ function applyAttributes(attrs, attrProps){
         if(shouldInterpolate(attrValue)){
             attrValue = cleanInterpolationTags(attrValue);
             tmpl = `
-            Simply.iDOM.attr('${cleanAttrName(attr.name)}', ${attrValue});
+            iDOM.attr('${cleanAttrName(attr.name)}', ${attrValue});
         `;
         }else{
             tmpl = `
-            Simply.iDOM.attr('${cleanAttrName(attr.name)}', '${escapeSingleQuotes(attrValue)}');
+            iDOM.attr('${cleanAttrName(attr.name)}', '${escapeSingleQuotes(attrValue)}');
         `;
         }
 
@@ -317,7 +317,7 @@ function applyAttributes(attrs, attrProps){
     // if we have a show attribute property
     if(attrProps.show){
         tmpl += `
-            Simply.iDOM.attr('style', !!${attrProps.show} ? '' : 'display: none;');
+            iDOM.attr('style', !!${attrProps.show} ? '' : 'display: none;');
         `;
     }
 
@@ -326,7 +326,7 @@ function applyAttributes(attrs, attrProps){
 
 function openTag(tagName, attrProps){
     return `
-        Simply.iDOM.elementOpenStart('${tagName}', ${attrProps.id});
+        iDOM.elementOpenStart('${tagName}', ${attrProps.id});
     `
 }
 
@@ -344,14 +344,14 @@ function addText(textValue){
         // so we should capture those
         tmpl += `
             try{
-                Simply.iDOM.text(\`${text}\` || '');
+                iDOM.text(\`${text}\` || '');
             }catch(e){
                 console.error(e);
             }
         `;
     }else{
         tmpl += `
-            Simply.iDOM.text(\`${escapeBacktickQuotes(text)}\`);
+            iDOM.text(\`${escapeBacktickQuotes(text)}\`);
         `;
     }
 
