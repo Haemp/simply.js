@@ -185,7 +185,7 @@ function closeOpenTag() {
 }
 
 function applyEach(each, curNode){
-    const [item, collection] = each.split('in');
+    const [item, collection] = each.split(' in ');
     let tmpl = '';
 
 

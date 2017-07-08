@@ -1,17 +1,23 @@
 # TODO
-[ ] - Add a way to include simply via ES6 module loader
-There is an issue with this way of loading simply right now. The iDOM relies on globally set values. 
-We need to pass the idom global vars into the outtermost scope of the build code. so that we don't rely on global 
-values like that. 
+[ ] - solve non runtime compilation
+- Has to be conformnt with modern workflows
+  - Probably a webpack loader.
+
+
+
+[ ] - When you render a non existing object it will cause an error. This is annoying an should
+      simply fail silently
+[ ] - add tests
+[ ] - Write docs
 
 # simply.js
-There are two hard things in working with native javascript in a modern way. 
+There are two hard things in working with native javascript in a modern way.
 
 1) Dependency management - Chrome 61 has native modules so this is being solved
-2) Data <-> View management - Every framework out there has their own model of handling this. 
+2) Data <-> View management - Every framework out there has their own model of handling this.
 And it is something you need to really work productively.
 
-Simply.js aim is to remove the barriers to productivity while still staying as close to the 
+Simply.js aim is to remove the barriers to productivity while still staying as close to the
 javascript standard as possible.
 
 ## Installation
@@ -51,7 +57,7 @@ class SimplyComponent extends Simply.Component{
     }
 
     connectedCallback(){
-        
+
         // call this manually when the view needs to update
         this.render();
     }
@@ -63,7 +69,7 @@ SimplyComponent.compile();
 Pure Web Components example
 ```javascript
 class CustomElement extends HTMLElement{
-    
+
     static get template(){
         return `
             <div>
@@ -93,15 +99,14 @@ class CustomElement extends HTMLElement{
         this.selectedItem = item;
         this.render();
     }
-    
+
     connectedCallback(){
         this.render();    
     }
-    
+
     render(){
         CustomElement.render(this, this.shadow)
     }
 }
 CustomElement.render = Simply.compileTemplate(CustomElement.template);
 ```
-
