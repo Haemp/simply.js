@@ -30,6 +30,7 @@
     "karma": "^1.7.0",
     "rollup": "^0.43.0",
     "rollup-watch": "^4.0.0",
-    "watchify": "^3.9.0"
+    "watchify": "^3.9.0",
+    "webpack": "^3.5.4"
   }
 }

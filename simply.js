@@ -195,19 +195,29 @@ function applyEach(each, curNode){
     // clean curNode from the each property before we start
     // stamping it - otherwise this will lead to an infinite loop
     curNode.removeAttribute('each');
-
-    tmpl += `
-        try{
-            // generate repeating element
-            ${collection}.forEach((${item}) => {
-                ${generateTemplateRecusive(curNode)}
-            });
-        }catch(err){
-            console.warn(err);
-        }
-    `;
+    
+    tmpl += wrapAndThrowError(`
+        // generate repeating element
+        ${collection}.forEach((${item}) => {
+            ${generateTemplateRecusive(curNode)}
+        });
+    `);
 
     return tmpl;
+}
+
+function wrapAndThrowError(codeString){
+    return `
+        try{
+            ${codeString}
+        }catch(err){
+            ${function () {
+                if (settings.showCompilationWarnings) {
+                    return `console.warn(err);`;
+                }
+            }()}
+        }
+    `;
 }
 
 function applyAttrProps(attrProps, curNode){
@@ -349,14 +359,8 @@ function addText(textValue){
         // it is possible that we get null pointers
         // anytime we are interpolating values
         // so we should capture those
-        tmpl += `
-            try{
-                iDOM.text(\`${text}\` || '');
-            }catch(e){
-                
-                console.warn(e);
-            }
-        `;
+        tmpl += wrapAndThrowError(`iDOM.text(\`${text}\` || '');`);
+
     }else{
         tmpl += `
             iDOM.text(\`${escapeBacktickQuotes(text)}\`);

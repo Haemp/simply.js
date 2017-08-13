@@ -1,3 +1,5 @@
+Simply.settings.showCompilationWarnings = false;
+
 class WebComponent extends HTMLElement{
 
     static get template(){
@@ -48,8 +50,6 @@ class WebComponent extends HTMLElement{
 }
 WebComponent.render = Simply.compileTemplate(WebComponent.template);
 customElements.define('s-webcomponent', WebComponent);
-
-console.log(Simply.Component);
 
 class SimplyComponent extends Simply.Component{
 

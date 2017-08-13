@@ -1,11 +1,4 @@
 # TODO
-[ ] - Change browserify to webpack to get watch support. 
-[ ] - solve non runtime compilation
-- Has to be conformnt with modern workflows
-  - Probably a webpack loader.
-
-[ ] - When you render a non existing object it will cause an error. This is annoying an should
-      simply fail silently
 [ ] - add tests
 [ ] - Write docs
 
@@ -18,7 +11,6 @@ And it is something you need to really work productively.
 
 Simply.js aim is to remove the barriers to productivity while still staying as close to the
 javascript standard as possible.
-
 
 # Nesting
 1) Shadow DOM is not visible for the iDOM
