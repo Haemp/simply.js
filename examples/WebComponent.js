@@ -8,6 +8,9 @@ class WebComponent extends HTMLElement{
                 </ul>
                 <s-anothercomponent></s-anothercomponent>
                 <s-anothersimplycomponent></s-anothersimplycomponent>
+                <div each="item in this.noItemsHere">
+                    hey
+                </div>
                 <div if="this.selectedItem">
                     {{ this.selectedItem.name }} is my favorite
                 </div>

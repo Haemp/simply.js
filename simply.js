@@ -11,6 +11,10 @@ iDOM.attributes[iDOM.symbols.default] = (element, name, value) => {
     }
 };
 
+// default settings
+const settings = {
+    showCompilationWarnings: false
+};
 
 /**
  * @param template
@@ -52,9 +56,9 @@ function SimplyRender(template){
         // next frame.
 
         iDOM.patch(renderNode, () => {
-            new Function('node', 'iDOM', `
+            new Function('node', 'iDOM', 'settings', `
                 ${iTemplate}
-            `).call(thisNode, thisNode, iDOM);
+            `).call(thisNode, thisNode, iDOM, settings);
         });
 
     }
@@ -188,16 +192,19 @@ function applyEach(each, curNode){
     const [item, collection] = each.split(' in ');
     let tmpl = '';
 
-
     // clean curNode from the each property before we start
     // stamping it - otherwise this will lead to an infinite loop
     curNode.removeAttribute('each');
 
     tmpl += `
-        // generate repeating element
-        ${collection}.forEach((${item}) => {
-            ${generateTemplateRecusive(curNode)}
-        });
+        try{
+            // generate repeating element
+            ${collection}.forEach((${item}) => {
+                ${generateTemplateRecusive(curNode)}
+            });
+        }catch(err){
+            console.warn(err);
+        }
     `;
 
     return tmpl;
@@ -346,7 +353,8 @@ function addText(textValue){
             try{
                 iDOM.text(\`${text}\` || '');
             }catch(e){
-                console.error(e);
+                
+                console.warn(e);
             }
         `;
     }else{
@@ -431,7 +439,9 @@ class Component extends HTMLElement{
     }
 }
 
+
 module.exports = {
+    settings,
     compileTemplate: SimplyRender,
     iDOM,
     Component: Component
