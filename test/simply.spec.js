@@ -1,24 +1,32 @@
+
 describe('Simply.js', () => {
 
-    it('Should render template text values', () => {
-        const message = 'Yo waddap?'
-        const render = Simply.compileTemplate('<em>{{ this.message }}</em>')
-        const div = document.createElement('div')
-        div.message = message
-        render(div)
-        const renderedHtml = div.querySelector('em')
+    describe('Rules', () => {
 
-        expect(renderedHtml).toBeTruthy()
-        expect(renderedHtml.innerText).toBe(message)
-    })
+        it('Should append click listeners ', () => {
+            const render = Simply.compileTemplate('<button (click)="this.clickMe()">Click me</button>')
+            const div = document.createElement('div');
+            div.clickMe = () => {};
+            const spy = spyOn(div, 'clickMe');
 
-    describe('Attributes', function(){
-        it('Should render object properties', function(){
+            render(div);
+            div.querySelector('button').click();
 
-        })
+            expect(div.clickMe).toHaveBeenCalled();
+        });
 
-        it('Should interpolate attribute values wrapped in {}', function(){
+        it('Should render template text values', () => {
+            const message = 'Yo waddap?';
+            const render = Simply.compileTemplate('<em>{{ this.message }}</em>');
+            const div = document.createElement('div');
+            div.message = message;
+            render(div);
+            const renderedHtml = div.querySelector('em');
 
-        })
+            expect(renderedHtml).toBeTruthy();
+            expect(renderedHtml.innerText).toBe(message);
+
+            div.remove();
+        });
     })
 })

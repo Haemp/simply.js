@@ -1,7 +1,12 @@
 module.exports = function(config) {
   config.set({
-      files: './test/*.spec.js',
-      basePath: '../..',
-      frameworks: ['jasmine']
+      files: [
+          './simply.min.js',
+          './test/*.spec.js'
+      ],
+      basePath: '..',
+      frameworks: ['jasmine'],
+      browsers: ['Chrome'],
+      autoWatch: true
   });
 };
