@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/Haemp/simply.js#readme",
   "dependencies": {
-    "incremental-dom": "^0.5.1"
+    "incremental-dom": "github:Haemp/incremental-dom"
   },
   "devDependencies": {
     "browserify": "^14.4.0",
