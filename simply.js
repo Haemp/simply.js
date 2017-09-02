@@ -239,7 +239,9 @@ function applyAttrProps(attrProps, curNode){
             if(!curNode.listeners.includes('${listener.eventName}')){
                 curNode.addEventListener('${listener.eventName}', (e) => {
                     const $event = e;
+                    const $evt = e;
                     const $element = curNode;
+                    const $el = curNode;
                     ${listener.callback};
                 });
                 curNode.listeners.push('${listener.eventName}');
