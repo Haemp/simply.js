@@ -28,5 +28,17 @@ describe('Simply.js', () => {
 
             div.remove();
         });
+
+        it('Should render undefined text values as empty strings', () => {
+
+            const render = Simply.compileTemplate('<em>{{ this.undefinedVariable }}</em>');
+            const div = document.createElement('div');
+            render(div);
+
+            const renderedHtml = div.querySelector('em');
+            expect(renderedHtml.innerText).toEqual('');
+
+            div.remove();
+        });
     })
 })

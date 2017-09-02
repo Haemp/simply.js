@@ -351,20 +351,18 @@ function openTag(tagName, attrProps){
 function addText(textValue){
     let text = textValue.trim();
     let tmpl = '';
+
     if(shouldInterpolateString(text)){
 
         // convert from {{ javascript }} => ${javascript}
         text = convertToTemplateVars(text);
 
-        // this prevents us from rendering undeclared
-        // vars as an "undefined" string
-        if(text === undefined)
-            text = '';
-
         // it is possible that we get null pointers
         // anytime we are interpolating values
         // so we should capture those
-        tmpl += wrapAndThrowError(`iDOM.text(\`${text}\` || '');`);
+        tmpl += wrapAndThrowError(`
+            iDOM.text(\`${text}\`);
+        `);
 
     }else{
         tmpl += `
@@ -409,6 +407,15 @@ function escapeBacktickQuotes(text){
     return text.replace(/`/g, "\\`");
 }
 
+function getStringInterpolationValue(text){
+
+    // match anything between {{ and }}
+    return text.replace(/{{([\s\S]*?)}}/g, (match) => {
+        // remove the interpolation indicators
+        const js = match.replace(/{{|}}/g, '');
+        return '${' + js + '}';
+    });
+}
 
 function convertToTemplateVars(text){
 
@@ -416,7 +423,10 @@ function convertToTemplateVars(text){
     return text.replace(/{{([\s\S]*?)}}/g, (match) => {
         // remove the interpolation indicators
         const js = match.replace(/{{|}}/g, '');
-        return '${' + js + '}';
+
+        // this prevents us from rendering undeclared
+        // vars as an "undefined" string
+        return '${' + js + ' === undefined ? "" : ' + js + '}';
     });
 }
 
