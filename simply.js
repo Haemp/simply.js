@@ -356,6 +356,11 @@ function addText(textValue){
         // convert from {{ javascript }} => ${javascript}
         text = convertToTemplateVars(text);
 
+        // this prevents us from rendering undeclared
+        // vars as an "undefined" string
+        if(text === undefined)
+            text = '';
+
         // it is possible that we get null pointers
         // anytime we are interpolating values
         // so we should capture those
