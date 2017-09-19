@@ -1,6 +1,10 @@
 # TODO
 [ ] - add tests
 [ ] - Write docs
+[ ] - ShadyDOM consistency, switch method to be this.$shadyDom = true in constructor
+
+# Handling ShadyDom
+
 
 # simply.js
 There are two hard things in working with native javascript in a modern way.
