@@ -40,5 +40,37 @@ describe('Simply.js', () => {
 
             div.remove();
         });
+
+        /**
+         * The issue behind this was solved by adding unique IDs for each element rendered
+         */
+        it('Should not reuse the underlying object when re-rendering similar components', () => {
+            const render = Simply.compileTemplate(`
+                <div if="this.potato" #potato (click)="this.potatoFunction()">
+                    potato
+                </div>
+                <div #no-potato if="!this.potato" id="no-potato" >
+                    no potato
+                </div>
+            
+                <button #btn (click)="this.potato = !this.potato; this.render()">Switch Potato</button>
+            `)
+
+            document.body.potato = true;
+            document.body.potatoFunction = () => {};
+            spyOn(document.body, 'potatoFunction');
+            document.body.render = () => {
+                render(document.body)
+            }
+            render(document.body)
+
+            document.body.$.potato.click();
+            expect(document.body.potatoFunction.calls.count()).toBe(1);
+
+            // re-render the view switching the potato value
+            document.body.$.btn.click();
+            document.body.$.noPotato.click();
+            expect(document.body.potatoFunction.calls.count()).toBe(1);
+        })
     })
 })

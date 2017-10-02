@@ -1,5 +1,5 @@
 const iDOM = require('incremental-dom');
-
+const shortId = require('shortid')
 
 // enforce { prop } formated attribute values
 // to set the property instead of the attribute
@@ -143,6 +143,7 @@ function generateTemplateRecusive(curNode){
     iTemplate += `
         }).call(node);
     `;
+
     return iTemplate;
 
 }
@@ -345,10 +346,9 @@ function applyAttributes(attrs, attrProps){
 
 function openTag(tagName, attrProps){
     return `
-        iDOM.elementOpenStart('${tagName}', ${attrProps.id});
+        iDOM.elementOpenStart('${tagName}', '${shortId.generate()}');
     `
 }
-
 
 function addText(textValue){
     let text = textValue.trim();
