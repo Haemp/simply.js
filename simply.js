@@ -236,19 +236,13 @@ function applyAttrProps(attrProps, curNode){
     `;
     }
 
-    // clean up listeners on curNode before
-    // we add the new ones.
-    console.log('Applying attribute props to ', attrProps)
-
     // iDom likes to re-use dom elements instead of creating new ones
     // but this means that we have to clean up our own event listeners
     // else the listener from a previous object will be attached to
     // a newer (but reused) one.
     tmpl += `
         if(curNode.listeners && curNode.listeners.size > 0){
-            console.log('Cleaning up listeners', curNode.listeners);
             curNode.listeners.forEach((callback, eventName) => {
-                console.log('Removing event handler', eventName, callback);
                 curNode.removeEventListener(eventName, callback)
             })
             curNode.listeners = new Map();
