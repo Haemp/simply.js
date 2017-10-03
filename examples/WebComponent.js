@@ -10,6 +10,7 @@ class WebComponent extends HTMLElement{
                 </ul>
                 <s-anothercomponent></s-anothercomponent>
                 <s-anothersimplycomponent></s-anothersimplycomponent>
+                <s-custom-component-a></s-custom-component-a>
                 <div each="item in this.noItemsHere">
                     hey
                 </div>
@@ -121,3 +122,17 @@ class AnotherSimplyComponent extends Simply.Component{
 }
 AnotherSimplyComponent.compile();
 customElements.define('s-anothersimplycomponent', AnotherSimplyComponent);
+
+class CustomComponentA extends Simply.Component {
+    static get template(){
+        return `
+            <div>{{ this.prop }} is the prop value</div>
+            <input type="text" (keydown)="this.prop = $el.value">
+        `;
+    }
+
+    static get props(){
+        return ['prop']
+    }
+}
+CustomComponentA.define('s-custom-component-a')

@@ -468,12 +468,35 @@ class Component extends HTMLElement{
             // this circumvents iDOM compilation of children
             return render(this, this.$shadyDom ? this : this.shadow);
         }
+
+        if(this.props){
+            this.props.forEach((prop) => {
+                Object.defineProperty(this.prototype, prop, {
+                    set: function (value) {
+                        this['_'+prop] = value;
+                        this.render();
+                    },
+                    get: function () {
+                        return this['_'+prop];
+                    }
+                })
+            })
+        }
+    }
+
+    static define(tagName){
+        this.compile();
+        customElements.define(tagName, this);
     }
 
     constructor(){
         super();
         if(!this.$shadyDom)
             this.shadow = this.attachShadow({mode: 'open'});
+    }
+
+    connectedCallback(){
+        this.render();
     }
 
     static get template(){
@@ -484,6 +507,10 @@ class Component extends HTMLElement{
 
 module.exports = {
     settings,
+    define: function(tagName, classDefinition){
+        classDefinition.compile();
+        customElements.define(tagName, classDefinition);
+    },
     compileTemplate: SimplyRender,
     iDOM,
     Component: Component

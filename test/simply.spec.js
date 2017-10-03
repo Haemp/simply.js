@@ -41,11 +41,15 @@ describe('Simply.js', () => {
             div.remove();
         });
 
-        /**
-         * The issue behind this was solved by adding unique IDs for each element rendered
-         */
-        it('Should not reuse the underlying object when re-rendering similar components', () => {
-            const render = Simply.compileTemplate(`
+        describe('Rendering', () => {
+            afterEach(() => {
+                document.body.innerHTML = ''
+            })
+            /**
+             * The issue behind this was solved by adding unique IDs for each element rendered
+             */
+            it('Should not reuse the underlying object when re-rendering similar components', () => {
+                const render = Simply.compileTemplate(`
                 <div if="this.potato" #potato (click)="this.potatoFunction()">
                     potato
                 </div>
@@ -54,22 +58,44 @@ describe('Simply.js', () => {
                 </div>
             `)
 
-            document.body.potato = true;
-            document.body.potatoFunction = () => {};
-            spyOn(document.body, 'potatoFunction');
-            render(document.body)
-            console.log(document.body);
-            document.body.$.potato.click();
-            expect(document.body.potatoFunction.calls.count()).toBe(1);
-            
-            // switch over to the other view
-            document.body.potato = false;
-            render(document.body)
+                document.body.potato = true;
+                document.body.potatoFunction = () => {};
+                spyOn(document.body, 'potatoFunction');
+                render(document.body)
+                document.body.$.potato.click();
+                expect(document.body.potatoFunction.calls.count()).toBe(1);
 
-            // re-render the view switching the potato value
-            document.body.$.noPotato.click();
-            console.log(document.body.$.noPotato.listeners)
-            expect(document.body.potatoFunction.calls.count()).toBe(1);
+                // switch over to the other view
+                document.body.potato = false;
+                render(document.body)
+
+                // re-render the view switching the potato value
+                document.body.$.noPotato.click();
+                expect(document.body.potatoFunction.calls.count()).toBe(1);
+            })
+        })
+
+        it('Should automatically re-render defined properties', () => {
+            class CustomComponentA extends Simply.Component {
+                static get template(){
+                    return `<div>{{ this.prop }}</div>`;
+                }
+                static get props(){
+                    return ['prop']
+                }
+            }
+            CustomComponentA.define('x-custom-component-a')
+
+            // the render method should be called
+            // once the component is added
+            const customComponent = new CustomComponentA();
+            spyOn(customComponent, 'render')
+            document.body.appendChild(customComponent)
+            expect(customComponent.render.calls.count()).toBe(1)
+
+            // and then once more when we change a property
+            customComponent.prop = 'yo!';
+            expect(customComponent.render.calls.count()).toBe(2)
         })
     })
 })
