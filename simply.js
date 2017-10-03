@@ -1,5 +1,4 @@
 const iDOM = require('incremental-dom');
-const shortId = require('shortid')
 
 // enforce { prop } formated attribute values
 // to set the property instead of the attribute
@@ -184,6 +183,13 @@ function closeIfStatement() {
 }
 
 function closeOpenTag() {
+
+    // if the DOM element is being reused
+    // from a previous one we need to clean the listeners
+    // off.
+
+    // check id of the DOM element
+    // if separate
     return `
     curNode = iDOM.elementOpenEnd();
 `;
@@ -230,22 +236,42 @@ function applyAttrProps(attrProps, curNode){
     `;
     }
 
+    // clean up listeners on curNode before
+    // we add the new ones.
+    console.log('Applying attribute props to ', attrProps)
+
+    // iDom likes to re-use dom elements instead of creating new ones
+    // but this means that we have to clean up our own event listeners
+    // else the listener from a previous object will be attached to
+    // a newer (but reused) one.
+    tmpl += `
+        if(curNode.listeners && curNode.listeners.size > 0){
+            console.log('Cleaning up listeners', curNode.listeners);
+            curNode.listeners.forEach((callback, eventName) => {
+                console.log('Removing event handler', eventName, callback);
+                curNode.removeEventListener(eventName, callback)
+            })
+            curNode.listeners = new Map();
+        }  
+    `;
+
     if(attrProps.listeners.length > 0) {
         tmpl += `
-            curNode.listeners = curNode.listeners || [];
+            curNode.listeners = curNode.listeners || new Map();
         `;
 
         tmpl += attrProps.listeners.map((listener) => {
             return `
-            if(!curNode.listeners.includes('${listener.eventName}')){
-                curNode.addEventListener('${listener.eventName}', (e) => {
+            if(!curNode.listeners.has('${listener.eventName}')){
+                const listener = (e) => {
                     const $event = e;
                     const $evt = e;
                     const $element = curNode;
                     const $el = curNode;
                     ${listener.callback};
-                });
-                curNode.listeners.push('${listener.eventName}');
+                };
+                curNode.addEventListener('${listener.eventName}', listener);
+                curNode.listeners.set('${listener.eventName}', listener);
             }
         `;
         }).join('\n ');
@@ -345,8 +371,9 @@ function applyAttributes(attrs, attrProps){
 }
 
 function openTag(tagName, attrProps){
+
     return `
-        iDOM.elementOpenStart('${tagName}', '${shortId.generate()}');
+        iDOM.elementOpenStart('${tagName}', '${attrProps.id}');
     `
 }
 

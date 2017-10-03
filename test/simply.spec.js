@@ -52,24 +52,23 @@ describe('Simply.js', () => {
                 <div #no-potato if="!this.potato" id="no-potato" >
                     no potato
                 </div>
-            
-                <button #btn (click)="this.potato = !this.potato; this.render()">Switch Potato</button>
             `)
 
             document.body.potato = true;
             document.body.potatoFunction = () => {};
             spyOn(document.body, 'potatoFunction');
-            document.body.render = () => {
-                render(document.body)
-            }
             render(document.body)
-
+            console.log(document.body);
             document.body.$.potato.click();
             expect(document.body.potatoFunction.calls.count()).toBe(1);
+            
+            // switch over to the other view
+            document.body.potato = false;
+            render(document.body)
 
             // re-render the view switching the potato value
-            document.body.$.btn.click();
             document.body.$.noPotato.click();
+            console.log(document.body.$.noPotato.listeners)
             expect(document.body.potatoFunction.calls.count()).toBe(1);
         })
     })
