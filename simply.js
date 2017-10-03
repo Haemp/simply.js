@@ -373,7 +373,7 @@ function applyAttributes(attrs, attrProps){
 function openTag(tagName, attrProps){
 
     return `
-        iDOM.elementOpenStart('${tagName}', '${attrProps.id}');
+        iDOM.elementOpenStart('${tagName}');
     `
 }
 
