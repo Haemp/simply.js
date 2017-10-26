@@ -73,6 +73,7 @@ describe('Simply.js', () => {
                 document.body.$.noPotato.click();
                 expect(document.body.potatoFunction.calls.count()).toBe(1);
             })
+
         })
 
         it('Should automatically re-render defined properties', () => {
@@ -96,6 +97,38 @@ describe('Simply.js', () => {
             // and then once more when we change a property
             customComponent.prop = 'yo!';
             expect(customComponent.render.calls.count()).toBe(2)
+        })
+    })
+
+    describe('Components', () => {
+
+        it('Should have post-compile values available in the connectedCallback handler', () => {
+            let title = '';
+            class InnerCard extends Simply.Component{
+
+                static get template(){
+                    return `
+                        <header>{{ this.getAttribute('title') }}</header>
+                    `;
+                }
+
+                connectedCallback(){
+                    title = this.getAttribute('title');
+                }
+            }
+            InnerCard.define('f-inner-card')
+
+            class Card extends Simply.Component{
+
+                static get template(){
+                    return `
+                        <f-inner-card title="ThisTitle"></f-inner-card>
+                    `;
+                }
+            }
+            Card.define('f-card')
+            document.body.innerHTML = '<f-card></f-card>';
+            expect(title).toBe('ThisTitle');
         })
     })
 })

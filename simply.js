@@ -113,7 +113,7 @@ function generateTemplateRecusive(curNode){
             // if there is an if attrProp we wrap this
             // in an if statement
             // TODO: Void elements
-            iTemplate += openTag(tagName, attrProps);
+            iTemplate += openTag(tagName, attrProps.staticAttributes);
 
             // 4 Apply the attributes
             iTemplate += applyAttributes(curNode.attributes, attrProps);
@@ -202,7 +202,7 @@ function applyEach(each, curNode){
     // clean curNode from the each property before we start
     // stamping it - otherwise this will lead to an infinite loop
     curNode.removeAttribute('each');
-    
+
     tmpl += wrapAndThrowError(`
         // generate repeating element
         ${collection}.forEach((${item}) => {
@@ -219,10 +219,10 @@ function wrapAndThrowError(codeString){
             ${codeString}
         }catch(err){
             ${function () {
-                if (settings.showCompilationWarnings) {
-                    return `console.warn(err);`;
-                }
-            }()}
+        if (settings.showCompilationWarnings) {
+            return `console.warn(err);`;
+        }
+    }()}
         }
     `;
 }
@@ -281,7 +281,8 @@ function parseAttrProps(attrs, curNode){
         ref: null, // the name of the ref
         if: null, // the condition in js
         show: null, // the condition in js
-        each: null // the formula and template
+        each: null, // the formula and template
+        staticAttributes: [] // list of normal attributes
     };
     [...attrs].forEach((attr) => {
         const attrName = attr.name;
@@ -302,6 +303,15 @@ function parseAttrProps(attrs, curNode){
 
         } else if (isShowAttr(attrName)) {
             attrProps.show = attrValue;
+        } else {
+            // If the attribute is a simple non iterpolatable
+            // value we add it to the static array. This way
+            // it can be applied immediately when we create the
+            // DOM object - and will be present in the
+            // connectionCallback call.
+            if(!shouldInterpolateString(attrValue)){
+                attrProps.staticAttributes.push({name: attrName, value: attrValue});
+            }
         }
     });
     return attrProps;
@@ -364,10 +374,21 @@ function applyAttributes(attrs, attrProps){
     return tmpl;
 }
 
-function openTag(tagName, attrProps){
+/**
+ * @param {String} tagName
+ * @param {Array<{name: String, value: Mixed}>} staticAttrProps
+ * @returns {string}
+ */
+function openTag(tagName, staticAttrProps){
+
+    const props = staticAttrProps || [];
+    const propsArray = props.reduce((prev, prop) => {
+        return [...prev, prop.name, prop.value];
+    }, []);
+    const attributesString = JSON.stringify(propsArray);
 
     return `
-        iDOM.elementOpenStart('${tagName}');
+        iDOM.elementOpenStart('${tagName}', ${attributesString});
     `
 }
 
@@ -482,6 +503,27 @@ class Component extends HTMLElement{
                 })
             })
         }
+
+        // save user defined callback to schedule
+        // connectedCallback AFTER compile to ensure
+        // we have all state set before we start manipulation
+        const userDefinedCallback = this.prototype.connectedCallback;
+
+        // connectedCallback triggers rendering routine
+        this.prototype.connectedCallback = function(){
+            this.render();
+        }
+
+        // rendering routine triggers compiled callback
+        this.prototype.compiledCallback = function () {
+
+            if(userDefinedCallback)
+                userDefinedCallback.call(this);
+
+            // We render again to pickup the compiled values
+            // TODO: This could be refactored for efficiency
+            this.render();
+        }
     }
 
     static define(tagName){
@@ -493,10 +535,6 @@ class Component extends HTMLElement{
         super();
         if(!this.$shadyDom)
             this.shadow = this.attachShadow({mode: 'open'});
-    }
-
-    connectedCallback(){
-        this.render();
     }
 
     static get template(){
