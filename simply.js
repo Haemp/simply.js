@@ -157,8 +157,11 @@ function generateTemplateRecusive(curNode){
  */
 function triggerCompiled(){
     return `
-        if(typeof curNode.compiledCallback === 'function' && curNode.$compiled != true){
-            curNode.compiledCallback();
+        if(curNode.$shouldWaitForCompile && curNode.$compiled != true){
+            if(curNode.compiledCallback)
+                curNode.compiledCallback();
+                
+            curNode.$shouldWaitForCompile = false;
             curNode.$compiled = true;
         }
     `;
@@ -192,6 +195,7 @@ function closeOpenTag() {
     // if separate
     return `
     curNode = iDOM.elementOpenEnd();
+    curNode.$shouldWaitForCompile = true;
 `;
 }
 
@@ -512,6 +516,11 @@ class Component extends HTMLElement{
         // connectedCallback triggers rendering routine
         this.prototype.connectedCallback = function(){
             this.render();
+
+            if(!this.$shouldWaitForCompile){
+                if(userDefinedCallback)
+                    userDefinedCallback.call(this);
+            }
         }
 
         // rendering routine triggers compiled callback

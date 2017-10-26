@@ -116,7 +116,6 @@ describe('Simply.js', () => {
                     title = this.getAttribute('title');
                 }
             }
-            InnerCard.define('f-inner-card')
 
             class Card extends Simply.Component{
 
@@ -126,9 +125,30 @@ describe('Simply.js', () => {
                     `;
                 }
             }
+
+            InnerCard.define('f-inner-card')
             Card.define('f-card')
             document.body.innerHTML = '<f-card></f-card>';
             expect(title).toBe('ThisTitle');
+        })
+
+        it('Should have post-compile values available in the connectedCallback handler', () => {
+            let connectedCallbackCalled = false;
+            class Card extends Simply.Component{
+
+                static get template(){
+                    return `
+                        <div>asda</div>
+                    `;
+                }
+
+                connectedCallback(){
+                    connectedCallbackCalled = true;
+                }
+            }
+            Card.define('f-card')
+            document.body.innerHTML = '<f-card></f-card>';
+            expect(connectedCallbackCalled).toBe(true);
         })
     })
 })
