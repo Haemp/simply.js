@@ -1,4 +1,4 @@
-fdescribe('Components', () => {
+describe('Components', () => {
     it('Should handle components being defined out of order', (done) => {
         let wasRegistered = false;
         class Card extends Simply.Component{

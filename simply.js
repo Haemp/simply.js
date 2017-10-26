@@ -10,6 +10,7 @@ iDOM.attributes[iDOM.symbols.default] = (element, name, value) => {
     }
 };
 
+const registeredComponents = new Map();
 // default settings
 const settings = {
     showCompilationWarnings: false
@@ -536,8 +537,13 @@ class Component extends HTMLElement{
     }
 
     static define(tagName){
+        if(registeredComponents.has(tagName)){
+            throw new Error('You\'re trying to define ' + tagName + ' twice');
+            return;
+        }
         this.compile();
         customElements.define(tagName, this);
+        registeredComponents.set(tagName, this);
     }
 
     constructor(){
