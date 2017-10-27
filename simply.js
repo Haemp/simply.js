@@ -393,7 +393,7 @@ function openTag(tagName, staticAttrProps){
     const attributesString = JSON.stringify(propsArray);
 
     return `
-        iDOM.elementOpenStart('${tagName}', ${attributesString});
+        iDOM.elementOpenStart('${tagName}', '', ${attributesString});
     `
 }
 
