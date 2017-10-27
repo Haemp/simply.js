@@ -175,9 +175,22 @@ function closeElement(tagName){
 }
 
 function openIfStatement(condition){
+
+    // if a condition throws an error its false
     return `
-    if (${condition}) {
-`;
+        let condition;
+        try{
+            condition = ${condition}
+        }catch(err){
+            ${function () {
+                if (settings.showCompilationWarnings) {
+                    return `console.warn(err);`;
+                }
+            }()}
+            condition = false;
+        }
+        if (condition) {
+    `;
 }
 
 function closeIfStatement() {
@@ -224,10 +237,10 @@ function wrapAndThrowError(codeString){
             ${codeString}
         }catch(err){
             ${function () {
-        if (settings.showCompilationWarnings) {
-            return `console.warn(err);`;
-        }
-    }()}
+                if (settings.showCompilationWarnings) {
+                    return `console.warn(err);`;
+                }
+            }()}
         }
     `;
 }

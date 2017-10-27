@@ -39,6 +39,30 @@ describe('Simply.js', () => {
             div.remove();
         });
 
+        it('If condition throwing error should equal false', () => {
+            const render = Simply.compileTemplate('<em if="this.nonExistantVairable.prop"></em>');
+            const div = document.createElement('div');
+            render(div);
+
+            const renderedHtml = div.querySelector('em');
+            expect(renderedHtml).toBe(null);
+
+            div.remove();
+        });
+
+
+        it('Should insert the element if the if statement is true', () => {
+            const render = Simply.compileTemplate('<em if="this.existingVariable.prop"></em>');
+            const div = document.createElement('div');
+            div.existingVariable = {prop:true};
+            render(div);
+
+            const renderedHtml = div.querySelector('em');
+            expect(renderedHtml !== null).toBe(true);
+
+            div.remove();
+        });
+
         it('Should render undefined text values as empty strings', () => {
 
             const render = Simply.compileTemplate('<em>{{ this.undefinedVariable }}</em>');
@@ -51,7 +75,7 @@ describe('Simply.js', () => {
             div.remove();
         });
 
-        fit('Should add a reference on the parent dom', () => {
+        it('Should add a reference on the parent dom', () => {
 
             const render = Simply.compileTemplate('<em #someRef>{{ this.undefinedVariable }}</em>');
             const div = document.createElement('div');
