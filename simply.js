@@ -33,7 +33,7 @@ function SimplyRender(template){
     const fragment = document.createDocumentFragment();
     const div = document.createElement('div');
     fragment.appendChild(div);
-    div.innerHTML = template;
+    div.innerHTML = preProcessTemplate(template);
     const dom = div;
     let iTemplate = generateTemplateFromNodes([...dom.childNodes]);
 
@@ -483,6 +483,21 @@ function snakeToCamel(str){
     return str.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
 }
 
+function camelToSnake(str){
+    return str.replace(/([A-Z])/g, function($1){return "-"+$1.toLowerCase();});
+}
+
+function preProcessTemplate(template){
+
+    // replace id refs with kebab-cased
+    // <div #someId> -> <div #some-id
+    return template.replace(/<([\s\S]+?)>/g, (matchTag) => {
+        return matchTag.replace(/#([a-zA-Z]+?)[> ]/, (match) => {
+            return camelToSnake(match)
+        })
+    })
+}
+
 class Component extends HTMLElement{
 
     static compile(){
@@ -566,6 +581,7 @@ module.exports = {
     },
     compileTemplate: SimplyRender,
     iDOM,
-    Component: Component
+    Component: Component,
+    preProcessTemplate
 };
 

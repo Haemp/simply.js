@@ -15,6 +15,16 @@ describe('Simply.js', () => {
             expect(div.clickMe).toHaveBeenCalled();
         });
 
+        it('Should pre-process ref tags', () => {
+            const processed = Simply.preProcessTemplate(`
+                <div #someId></div>
+            `.trim());
+
+            expect(processed).toBe(`
+                <div #some-id></div>
+            `.trim());
+        })
+
         it('Should render template text values', () => {
             const message = 'Yo waddap?';
             const render = Simply.compileTemplate('<em>{{ this.message }}</em>');
@@ -37,6 +47,18 @@ describe('Simply.js', () => {
 
             const renderedHtml = div.querySelector('em');
             expect(renderedHtml.innerText).toEqual('');
+
+            div.remove();
+        });
+
+        fit('Should add a reference on the parent dom', () => {
+
+            const render = Simply.compileTemplate('<em #someRef>{{ this.undefinedVariable }}</em>');
+            const div = document.createElement('div');
+            render(div);
+
+
+            expect(div.$.someRef !== undefined).toBe(true)
 
             div.remove();
         });
@@ -121,14 +143,14 @@ describe('Simply.js', () => {
 
                 static get template(){
                     return `
-                        <f-inner-card title="ThisTitle"></f-inner-card>
+                        <f-inner-card-one title="ThisTitle"></f-inner-card-one>
                     `;
                 }
             }
 
-            InnerCard.define('f-inner-card')
-            Card.define('f-card')
-            document.body.innerHTML = '<f-card></f-card>';
+            InnerCard.define('f-inner-card-one')
+            Card.define('f-card-one')
+            document.body.innerHTML = '<f-card-one></f-card-one>';
             expect(title).toBe('ThisTitle');
         })
 
@@ -146,8 +168,8 @@ describe('Simply.js', () => {
                     connectedCallbackCalled = true;
                 }
             }
-            Card.define('f-card')
-            document.body.innerHTML = '<f-card></f-card>';
+            Card.define('f-card-two')
+            document.body.innerHTML = '<f-card-two></f-card-two>';
             expect(connectedCallbackCalled).toBe(true);
         })
     })
