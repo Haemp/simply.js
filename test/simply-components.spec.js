@@ -1,5 +1,5 @@
 describe('Components', () => {
-    it('Should handle components being defined out of order', (done) => {
+    xit('Should handle components being defined out of order', (done) => {
         let wasRegistered = false;
         class Card extends Simply.Component{
 
@@ -47,5 +47,53 @@ describe('Components', () => {
             expect(wasRegistered).toBe(true)
             done()
         })
+    })
+
+
+
+    it('Should only trigger the connectedCallback once', () => {
+        let cardConnected = 0;
+        let innerCardConnected = 0;
+        class Card extends Simply.Component{
+
+            static get template(){
+                return `
+                    <header>{{ this.title }}</header>
+                    <xx-inner-card title="Inner Title"></xx-inner-card>
+                `;
+            }
+
+            static get props(){
+                return ['title'];
+            }
+
+            connectedCallback(){
+                cardConnected++;
+            }
+        }
+        Card.define('xx-card');
+
+        class InnerCard extends Simply.Component{
+
+            static get template(){
+                return `
+                    <header>{{ this.title }}</header>
+                `;
+            }
+
+            static get props(){
+                return ['title'];
+            }
+
+            connectedCallback(){
+                innerCardConnected++;
+            }
+        }
+
+        InnerCard.define('xx-inner-card')
+
+        document.body.innerHTML = '<xx-card></xx-card>'
+        expect(cardConnected).toBe(1);
+        expect(innerCardConnected).toBe(1);
     })
 })

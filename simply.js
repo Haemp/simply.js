@@ -158,11 +158,10 @@ function generateTemplateRecusive(curNode){
  */
 function triggerCompiled(){
     return `
-        if(curNode.$shouldWaitForCompile && curNode.$compiled != true){
+        if(curNode.$compiled != true){
             if(curNode.compiledCallback)
                 curNode.compiledCallback();
                 
-            curNode.$shouldWaitForCompile = false;
             curNode.$compiled = true;
         }
     `;
@@ -209,7 +208,6 @@ function closeOpenTag() {
     // if separate
     return `
     curNode = iDOM.elementOpenEnd();
-    curNode.$shouldWaitForCompile = true;
 `;
 }
 
@@ -221,6 +219,9 @@ function applyEach(each, curNode){
     // stamping it - otherwise this will lead to an infinite loop
     curNode.removeAttribute('each');
 
+    // TODO: There is a bug where where events set on an element
+    // inside an each statement will have the data object set as
+    // "this". 
     tmpl += wrapAndThrowError(`
         // generate repeating element
         ${collection}.forEach((${item}) => {
@@ -523,8 +524,12 @@ class Component extends HTMLElement{
             return render(this, this.$shadyDom ? this : this.shadow);
         }
 
+        // wraps the given property in a setter to render
+        // on update
         if(this.props){
             this.props.forEach((prop) => {
+
+                // TODO: throw error if the property already exists
                 Object.defineProperty(this.prototype, prop, {
                     set: function (value) {
                         this['_'+prop] = value;
@@ -544,11 +549,21 @@ class Component extends HTMLElement{
 
         // connectedCallback triggers rendering routine
         this.prototype.connectedCallback = function(){
-            this.render();
 
-            if(!this.$shouldWaitForCompile){
+            // In the case of this method being called inside of a simply template
+            // we want to wait till the compiled handler to trigger this logic
+
+            // BUT in the case of the simply component being added directly to
+            // the the DOM and not via a simply template we want to trigger it directly
+
+            // When an element is created via iDOM - it puts this flag on the node.
+            // If so - we wait to trigger the connectedCallback till all compilation
+            // is done.
+            if(!this.$iDOMCreated){
                 if(userDefinedCallback)
                     userDefinedCallback.call(this);
+
+                this.render();
             }
         }
 
@@ -584,7 +599,6 @@ class Component extends HTMLElement{
         throw Error('Template methods needs to be overriden by compoent');
     }
 }
-
 
 module.exports = {
     settings,
