@@ -550,6 +550,7 @@ class Component extends HTMLElement{
         // connectedCallback triggers rendering routine
         this.prototype.connectedCallback = function(){
 
+            this.render();
             // In the case of this method being called inside of a simply template
             // we want to wait till the compiled handler to trigger this logic
 
@@ -563,7 +564,6 @@ class Component extends HTMLElement{
                 if(userDefinedCallback)
                     userDefinedCallback.call(this);
 
-                this.render();
             }
         }
 
